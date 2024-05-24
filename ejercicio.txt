@@ -1,0 +1,18 @@
+Desarrolla una aplicación de gestión de tareas (to-do list) utilizando FastAPI y MongoDB. La aplicación debe permitir a los usuarios realizar las siguientes operaciones:
+
+Crear una nueva tarea: Los usuarios deben poder crear una nueva tarea proporcionando un título, una descripción opcional y un estado inicial (por ejemplo, "pendiente", "en progreso" o "completada").
+
+Ver todas las tareas: Los usuarios deben poder ver todas las tareas disponibles en la base de datos.
+
+Ver una tarea por ID: Los usuarios deben poder ver los detalles de una tarea específica proporcionando su ID.
+
+Actualizar una tarea: Los usuarios deben poder actualizar una tarea existente, cambiando su título, descripción, estado, o cualquier otro campo relevante.
+
+Eliminar una tarea: Los usuarios deben poder eliminar una tarea existente proporcionando su ID.
+
+Requisitos adicionales:
+
+Utiliza Pydantic para definir los modelos de datos.
+Implementa un mecanismo de autenticación básico utilizando tokens JWT.
+Asegúrate de manejar los errores de forma adecuada y proporcionar mensajes de error significativos.
+Documenta todos los endpoints utilizando Swagger UI
