@@ -2,8 +2,9 @@ from fastapi import FastAPI, HTTPException
 from db.Models.modelos_tareas import Tarea, TareaId
 from db.client import client
 from db.Schemas.esquemas_tareas import tarea_to_dict
-from typing import List
+from typing import List, Optional
 from bson import ObjectId
+from pymongo import ReturnDocument
 
 app = FastAPI()
 
@@ -26,9 +27,20 @@ async def total_tareas() -> List[TareaId]:
     return lista_total
 
 
-@app.get("/tarea_dado_id/{id_buscar}", response_model=TareaId)
+@app.get("/tarea_dado_id/{id_buscar}", response_model=TareaId, summary="Endpoint que encuentra una tarea dado un id")
 async def tarea_dado_id(id_buscar:str) -> TareaId:
     tarea_encontrada = tarea_to_dict(client.local.tareas.find_one({"_id":ObjectId(id_buscar)}))
     return TareaId(**tarea_encontrada)
+
+
+@app.put("/modificar_tarea/{id_modificar}", response_model=TareaId, summary="Endpoint que sirve para modificar")
+async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nuevo:str, descripcion_nueva:Optional[str]=None) -> TareaId:
+    instancia_nueva = Tarea( titulo=titulo_nuevo, estado_inicial=estado_inicial_nuevo, descripcion=descripcion_nueva)
+    instancia_nueva_to_dict = instancia_nueva.dict()
+    tarea_modificada = client.local.tareas.find_one_and_update({"_id":ObjectId(id_modificar)},
+                                                               {"$set":instancia_nueva_to_dict},
+                                                               return_document=ReturnDocument.AFTER)
+    tarea_modificada_dict = tarea_to_dict(tarea_modificada)
+    return tarea_modificada_dict
 
 
