@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from db.Models.modelos_tareas import Tarea, TareaId
+from db.Models.modelos_tareas import Tarea, TareaId, User, UserDB
 from db.client import client
-from db.Schemas.esquemas_tareas import tarea_to_dict
+from db.Schemas.esquemas_tareas import tarea_to_dict, user_to_dict
 from typing import List, Optional
 from bson.objectid import ObjectId
 from pymongo import ReturnDocument
@@ -65,5 +65,14 @@ async def eliminar_tarea(titulo_eliminar:str) -> dict:
         return {"Cantidad de tareas eliminadas":conteo_de_eliminados}
     else:
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    
+#Creacion y autenticación de usuarios
+
+@app.post("/insertar_user", response_model=UserDB, status_code=201, summary="Endpoint que sirve para crear nuevos usuarios")
+async def insertar_user(nuevo_user:User) -> UserDB:
+    nuevo_user_dict = dict(nuevo_user)
+    id = client.local.users.insert_one(nuevo_user_dict).inserted_id
+    user_mongo = user_to_dict(client.local.users.find_one({"_id":id}))
+    return UserDB(**user_mongo)
 
 
