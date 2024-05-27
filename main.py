@@ -33,7 +33,7 @@ async def tarea_dado_id(id_buscar:str) -> TareaId:
     return TareaId(**tarea_encontrada)
 
 
-@app.put("/modificar_tarea/{id_modificar}", response_model=TareaId, summary="Endpoint que sirve para modificar")
+@app.put("/modificar_tarea/{id_modificar}", response_model=TareaId, summary="Endpoint que sirve para modificar una tarea dado un id")
 async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nuevo:str, descripcion_nueva:Optional[str]=None) -> TareaId:
     instancia_nueva = Tarea( titulo=titulo_nuevo, estado_inicial=estado_inicial_nuevo, descripcion=descripcion_nueva)
     instancia_nueva_to_dict = instancia_nueva.dict()
@@ -42,5 +42,11 @@ async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nue
                                                                return_document=ReturnDocument.AFTER)
     tarea_modificada_dict = tarea_to_dict(tarea_modificada)
     return tarea_modificada_dict
+
+
+@app.delete("/eliminar_tarea/{titulo_eliminar}", response_model=dict, summary="Endpoint para eliminar tarea segun el título")
+async def eliminar_tarea(titulo_eliminar:str) -> dict:    
+    conteo_de_eliminados=client.local.tareas.delete_many({"titulo":titulo_eliminar}).deleted_count
+    return {"Cantidad de tareas eliminadas":conteo_de_eliminados}
 
 
