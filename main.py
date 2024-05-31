@@ -1,13 +1,16 @@
-from fastapi import FastAPI, HTTPException
-from db.Models.modelos_tareas import Tarea, TareaId, User, UserDB
+from fastapi import FastAPI, HTTPException, Depends
+from db.Models.modelos_tareas import Tarea, TareaId, User, UserDB, Token, TokenData
 from db.client import client
 from db.Schemas.esquemas_tareas import tarea_to_dict, user_to_dict
 from typing import List, Optional
 from bson.objectid import ObjectId
 from pymongo import ReturnDocument
 from bson.errors import InvalidId
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 app = FastAPI()
+oauth2 = OAuth2PasswordBearer(tokenUrl="login")
+
 
 
 @app.post("/insertar_tarea", response_model=TareaId, status_code=201, summary="Endpoint que sirve para crear nuevas tareas")
@@ -74,5 +77,21 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     id = client.local.users.insert_one(nuevo_user_dict).inserted_id
     user_mongo = user_to_dict(client.local.users.find_one({"_id":id}))
     return UserDB(**user_mongo)
+
+
+@app.get("/consultar_total_users", response_model=List[UserDB], summary="Endpoint que me devuelve el total de usuarios en la base de datos")
+async def consultar_total_users() -> List[UserDB]:
+    lista_total = []
+    for user in client.local.users.find():
+        dict_user=user_to_dict(user)
+        lista_total.append(UserDB(**dict_user))
+    return lista_total
+
+
+@app.get("/search_user/{username}", response_model=UserDB, status_code=200, summary="Endpoint que sirve para buscar un usuario específico" )
+async def search_user(username:str) -> UserDB:
+    return search(username) #la funcion de buscar usuarios hay que traerla de un modulo extra
+
+
 
 

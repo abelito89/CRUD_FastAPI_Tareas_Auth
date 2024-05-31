@@ -29,3 +29,14 @@ class UserDB(BaseModel):
     email:str = Field(description="Correo electrónico del usuario")
     disabled:bool = Field(description="Estado de habilitación del usuario")
     password:str = Field(description="Password del usuario")
+
+
+class Token(BaseModel):
+    access_token: str = Field(description="Token de acceso único generado cuando un usuario inicia sesión correctamente en el sistema")
+    token_type: str = Field(description="JWT")
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = Field(description="Nombre de usuario asociado al token de acceso")
+
+
