@@ -105,7 +105,7 @@ async def search_user(username:str) -> UserDB:
  #la funcion de buscar usuarios hay que traerla de un modulo extra
 
 @app.post("/token", response_model=Token)
-async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()):
+async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) -> Token:
     user_db = get_user(form_data.username)
     if not user_db:
         raise HTTPException(
