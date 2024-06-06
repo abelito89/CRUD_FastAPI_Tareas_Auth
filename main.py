@@ -10,6 +10,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from Autenticacion import get_user, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, oauth2_scheme, SECRET_KEY, ALGORITHM
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
+import bcrypt
 
 app = FastAPI()
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
@@ -76,7 +77,9 @@ async def eliminar_tarea(titulo_eliminar:str) -> dict:
 
 @app.post("/insertar_user", response_model=UserDB, status_code=201, summary="Endpoint que sirve para crear nuevos usuarios")
 async def insertar_user(nuevo_user:User) -> UserDB:
+    hashed_password = bcrypt.hashpw(nuevo_user.password.encode('utf-8'), bcrypt.gensalt())
     nuevo_user_dict = dict(nuevo_user)
+    nuevo_user_dict['password'] = hashed_password.decode('utf-8')
     id = client.local.users.insert_one(nuevo_user_dict).inserted_id
     user_mongo = user_to_dict(client.local.users.find_one({"_id":id}))
     return UserDB(**user_mongo)
@@ -93,18 +96,24 @@ async def consultar_total_users() -> List[UserDB]:
 
 @app.get("/search_user/{username}", response_model=UserDB, status_code=200, summary="Endpoint que sirve para buscar un usuario específico" )
 async def search_user(username:str) -> UserDB:
-    return get_user(username)
+    if get_user(username):
+        return get_user(username)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Usuario no encontrado",
+    )
  #la funcion de buscar usuarios hay que traerla de un modulo extra
 
 @app.post("/token", response_model=Token)
 async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()):
-    user_dict = get_user(form_data.username)
-    if not user_dict:
+    user_db = get_user(form_data.username)
+    if not user_db:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario o contraseña incorrectos",
             headers={"WWW-Authenticate":"Bearer"}
         )
+    user_dict = user_db.dict()
     user = User(**user_dict)
     if not verify_password(form_data.password, user.password):
         raise HTTPException(
@@ -133,7 +142,7 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(client, username=token_data.username)
+    user = get_user(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user

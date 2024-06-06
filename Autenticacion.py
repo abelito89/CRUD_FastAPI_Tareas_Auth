@@ -17,7 +17,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 #Algoritmo de encriptación
 ALGORITHM = os.getenv("ALGORITHM")
 #Tiempo de expiración del token
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 #Dependencia que indica dónde se enviarán las credenciales para obtener el token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -50,8 +50,10 @@ def verify_password(plain_password: Union[str,bytes], hashed_password: Union[str
 
 
 def get_user(username:str) -> UserDB:
-    if client.local.users.find_one({"username":username}):
-        usuario = user_to_dict(client.local.users.find_one({"username":username}))
-        return UserDB(**usuario)
+    user_data = client.local.users.find_one({"username": username})
+    if user_data:
+        user_dict = user_to_dict(user_data)
+        return UserDB(**user_dict)
+    return None
 
 
