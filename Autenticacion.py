@@ -1,9 +1,13 @@
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from dotenv import load_dotenv
 import os
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
+import bcrypt
+from db.client import client
+from db.Models.modelos_tareas import User, UserDB
+from db.Schemas.esquemas_tareas import user_to_dict
 
 #Configuracion de OAuth2
 load_dotenv() #Cargar variables de entorno desde .env
@@ -31,3 +35,23 @@ def create_access_token(data:dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp":expire}) #Se añade una nueva clave exp al diccionario to_encode con el valor de la fecha de expiración calculada
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+# Función para verificar la contraseña. Se intenta no comparar contraseñas en texto plano por seguridad
+def verify_password(plain_password: Union[str,bytes], hashed_password: Union[str,bytes]) -> bool:
+    # Convierte la contraseña en texto plano a bytes, si no lo está ya
+    if isinstance(plain_password, str):
+        plain_password = plain_password.encode('utf-8')
+    # Convierte la contraseña hasheada a bytes, si no lo está ya
+    if isinstance(hashed_password, str):
+        hashed_password = hashed_password.encode('utf-8')
+    
+    # Usa bcrypt para verificar si la contraseña en texto plano corresponde a la hasheada
+    return bcrypt.checkpw(plain_password, hashed_password)
+
+
+def get_user(username:str) -> UserDB:
+    if client.local.users.find_one({"username":username}):
+        usuario = user_to_dict(client.local.users.find_one({"username":username}))
+        return UserDB(**usuario)
+
+
