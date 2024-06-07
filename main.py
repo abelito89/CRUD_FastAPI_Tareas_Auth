@@ -6,15 +6,13 @@ from typing import List, Optional
 from bson.objectid import ObjectId
 from pymongo import ReturnDocument
 from bson.errors import InvalidId
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from Autenticacion import get_user, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, oauth2_scheme, SECRET_KEY, ALGORITHM
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import bcrypt
 
 app = FastAPI()
-oauth2 = OAuth2PasswordBearer(tokenUrl="login")
-
 
 
 @app.post("/insertar_tarea", response_model=TareaId, status_code=201, summary="Endpoint que sirve para crear nuevas tareas")
