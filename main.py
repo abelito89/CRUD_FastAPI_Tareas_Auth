@@ -129,6 +129,9 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     Retorna:
     - `UserDB`: El usuario creado.
     """
+    usuario_existente = client.local.users.find_one({"email": nuevo_user.email})
+    if usuario_existente:
+        raise HTTPException(status_code=409, detail="El correo electrónico ya está en uso")
     hashed_password = bcrypt.hashpw(nuevo_user.password.encode('utf-8'), bcrypt.gensalt())
     nuevo_user_dict = dict(nuevo_user)
     nuevo_user_dict['password'] = hashed_password.decode('utf-8')
