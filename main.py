@@ -19,14 +19,29 @@ oauth2 = OAuth2PasswordBearer(tokenUrl="login")
 
 @app.post("/insertar_tarea", response_model=TareaId, status_code=201, summary="Endpoint que sirve para crear nuevas tareas")
 async def insertar_tarea(nueva_tarea:Tarea) -> TareaId:
+    """
+    Crea una nueva tarea.
+
+    Parámetros:
+    - `nueva_tarea`: La nueva tarea a ser creada.
+
+    Retorna:
+    - `TareaId`: El ID de la tarea creada.
+    """
     nueva_tarea_dict = dict(nueva_tarea)
     id = client.local.tareas.insert_one(nueva_tarea_dict).inserted_id
     tarea_mongo = tarea_to_dict(client.local.tareas.find_one({"_id":id}))
     return TareaId(**tarea_mongo)
 
 
-@app.get("/consultar_total_de_tareas", response_model=List[TareaId], summary="Endopoint que sirve para consultar todas las tareas creadas")
+@app.get("/consultar_total_de_tareas", response_model=List[TareaId], summary="Endpoint que sirve para consultar todas las tareas creadas")
 async def total_tareas() -> List[TareaId]:
+    """
+    Consulta todas las tareas creadas.
+
+    Retorna:
+    - Lista[TareaId]: Lista de todas las tareas creadas.
+    """
     lista_total = []
     for doc in client.local.tareas.find():
         doc_dict = tarea_to_dict(doc)
@@ -36,6 +51,15 @@ async def total_tareas() -> List[TareaId]:
 
 @app.get("/tarea_dado_id/{id_buscar}", response_model=TareaId, summary="Endpoint que encuentra una tarea dado un id")
 async def tarea_dado_id(id_buscar:str) -> TareaId:
+    """
+    Encuentra una tarea dado un ID.
+
+    Parámetros:
+    - `id_buscar`: El ID de la tarea a buscar.
+
+    Retorna:
+    - `TareaId`: La tarea encontrada.
+    """
     try:
         ObjectId(id_buscar)
     except InvalidId:
@@ -49,6 +73,18 @@ async def tarea_dado_id(id_buscar:str) -> TareaId:
 
 @app.put("/modificar_tarea/{id_modificar}", response_model=TareaId, summary="Endpoint que sirve para modificar una tarea dado un id")
 async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nuevo:str, descripcion_nueva:Optional[str]=None) -> TareaId:
+    """
+    Modifica una tarea dado un ID.
+
+    Parámetros:
+    - `id_modificar`: El ID de la tarea a modificar.
+    - `titulo_nuevo`: El nuevo título de la tarea.
+    - `estado_inicial_nuevo`: El nuevo estado inicial de la tarea.
+    - `descripcion_nueva`: La nueva descripción de la tarea (opcional).
+
+    Retorna:
+    - `TareaId`: La tarea modificada.
+    """
     try:
         ObjectId(id_modificar)
     except InvalidId:
@@ -66,7 +102,16 @@ async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nue
 
 
 @app.delete("/eliminar_tarea/{titulo_eliminar}", response_model=dict, summary="Endpoint para eliminar tarea segun el título")
-async def eliminar_tarea(titulo_eliminar:str) -> dict:    
+async def eliminar_tarea(titulo_eliminar:str) -> dict:
+    """
+    Elimina una tarea según el título.
+
+    Parámetros:
+    - `titulo_eliminar`: El título de la tarea a eliminar.
+
+    Retorna:
+    - `dict`: Diccionario con la cantidad de tareas eliminadas.
+    """  
     conteo_de_eliminados=client.local.tareas.delete_many({"titulo":titulo_eliminar}).deleted_count
     if conteo_de_eliminados != 0:    
         return {"Cantidad de tareas eliminadas":conteo_de_eliminados}
@@ -77,6 +122,15 @@ async def eliminar_tarea(titulo_eliminar:str) -> dict:
 
 @app.post("/insertar_user", response_model=UserDB, status_code=201, summary="Endpoint que sirve para crear nuevos usuarios")
 async def insertar_user(nuevo_user:User) -> UserDB:
+    """
+    Crea un nuevo usuario.
+
+    Parámetros:
+    - `nuevo_user`: El nuevo usuario a ser creado.
+
+    Retorna:
+    - `UserDB`: El usuario creado.
+    """
     hashed_password = bcrypt.hashpw(nuevo_user.password.encode('utf-8'), bcrypt.gensalt())
     nuevo_user_dict = dict(nuevo_user)
     nuevo_user_dict['password'] = hashed_password.decode('utf-8')
@@ -87,6 +141,12 @@ async def insertar_user(nuevo_user:User) -> UserDB:
 
 @app.get("/consultar_total_users", response_model=List[UserDB], summary="Endpoint que me devuelve el total de usuarios en la base de datos")
 async def consultar_total_users() -> List[UserDB]:
+    """
+    Consulta el total de usuarios en la base de datos.
+
+    Retorna:
+    - Lista[UserDB]: Lista de todos los usuarios en la base de datos.
+    """
     lista_total = []
     for user in client.local.users.find():
         dict_user=user_to_dict(user)
@@ -96,6 +156,18 @@ async def consultar_total_users() -> List[UserDB]:
 
 @app.get("/search_user/{username}", response_model=UserDB, status_code=200, summary="Endpoint que sirve para buscar un usuario específico" )
 async def search_user(username:str) -> UserDB:
+    """
+    Busca un usuario específico.
+
+    Parámetros:
+    - `username`: El nombre de usuario a buscar.
+
+    Retorna:
+    - `UserDB`: El usuario encontrado.
+
+    Raise:
+    - `HTTPException`: Si el usuario no es encontrado.
+    """
     if get_user(username):
         return get_user(username)
     raise HTTPException(
@@ -106,6 +178,15 @@ async def search_user(username:str) -> UserDB:
 
 @app.post("/token", response_model=Token)
 async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) -> Token:
+    """
+    Genera un token de acceso para un usuario.
+
+    Parámetros:
+    - `form_data`: Datos del formulario de solicitud de contraseña.
+
+    Retorna:
+    - `Token`: El token de acceso generado.
+    """
     user_db = get_user(form_data.username)
     if not user_db:
         raise HTTPException(
@@ -129,6 +210,18 @@ async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) ->
 
 @app.get("/users/me")
 async def read_users_me(token: str = Depends(oauth2_scheme)):
+    """
+    Lee los datos del usuario actualmente autenticado.
+
+    Parámetros:
+    - `token`: El token de acceso del usuario.
+
+    Retorna:
+    - `User`: Los datos del usuario autenticado.
+
+    Raise:
+    - `HTTPException`: Si las credenciales no son válidas.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

@@ -25,6 +25,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 #Crear funciones auxiliares
 #Crear un token de acceso
 def create_access_token(data:dict, expires_delta: Optional[timedelta] = None):
+    """
+    Crea un token de acceso JWT.
+
+    Parámetros:
+    - `data`: Datos que se codificarán en el token.
+    - `expires_delta`: Duración de validez del token (opcional).
+
+    Retorna:
+    - `str`: Token de acceso JWT.
+    """
     #expires_delta define la duración de la validez de un token de acceso (JWT). 
     #Es un objeto del tipo timedelta que representa la cantidad de tiempo que el token será válido desde el momento en que se emite
     to_encode = data.copy()
@@ -38,6 +48,16 @@ def create_access_token(data:dict, expires_delta: Optional[timedelta] = None):
 
 # Función para verificar la contraseña. Se intenta no comparar contraseñas en texto plano por seguridad
 def verify_password(plain_password: Union[str,bytes], hashed_password: Union[str,bytes]) -> bool:
+    """
+    Verifica si una contraseña en texto plano coincide con una contraseña hasheada.
+
+    Parámetros:
+    - `plain_password`: Contraseña en texto plano.
+    - `hashed_password`: Contraseña hasheada.
+
+    Retorna:
+    - `bool`: True si las contraseñas coinciden, False en caso contrario.
+    """
     # Convierte la contraseña en texto plano a bytes, si no lo está ya
     if isinstance(plain_password, str):
         plain_password = plain_password.encode('utf-8')
@@ -50,6 +70,15 @@ def verify_password(plain_password: Union[str,bytes], hashed_password: Union[str
 
 
 def get_user(username:str) -> UserDB:
+    """
+    Obtiene un usuario por su nombre de usuario.
+
+    Parámetros:
+    - `username`: Nombre de usuario a buscar.
+
+    Retorna:
+    - `UserDB`: Datos del usuario encontrado o None si no se encuentra.
+    """
     user_data = client.local.users.find_one({"username": username})
     if user_data:
         user_dict = user_to_dict(user_data)
