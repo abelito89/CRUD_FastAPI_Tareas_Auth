@@ -27,8 +27,7 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
 1. Clona el repositorio:
 
    ```bash
-   git clone https://github.com/tu-usuario/tu-repositorio.git
-   cd tu-repositorio
+   git clone https://github.com/abelito89/CRUD_FastAPI_Tareas_Auth.git
    ```
 
 2. Crea y activa un entorno virtual:
