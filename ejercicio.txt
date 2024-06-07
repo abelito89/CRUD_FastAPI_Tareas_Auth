@@ -16,3 +16,53 @@ Utiliza Pydantic para definir los modelos de datos.
 Implementa un mecanismo de autenticación básico utilizando tokens JWT.
 Asegúrate de manejar los errores de forma adecuada y proporcionar mensajes de error significativos.
 Documenta todos los endpoints utilizando Swagger UI
+
+Para mejorar y complejizar la aplicación de FastAPI, puedes seguir agregando funcionalidades y mejoras de manera gradual. Aquí tienes algunas sugerencias concretas a modo de ejercicios:
+
+### Nivel Básico
+
+1. **Validaciones Adicionales**:
+   - **Descripción**: Agregar validaciones adicionales a los modelos de datos para asegurar que los campos cumplan con ciertos criterios.
+   - **Ejercicio**: Añadir validaciones para los campos de email y contraseña (mínimo 8 caracteres) en el modelo `User`.
+
+2. **Manejo de Paginación**:
+   - **Descripción**: Implementar paginación para los endpoints que devuelven listas de tareas y usuarios.
+   - **Ejercicio**: Añadir parámetros `limit` y `skip` a los endpoints `/consultar_total_de_tareas` y `/consultar_total_users`.
+
+### Nivel Intermedio
+
+3. **Envío de Correos Electrónicos**:
+   - **Descripción**: Implementar funcionalidad para enviar correos electrónicos al crear nuevas tareas o usuarios.
+   - **Ejercicio**: Utilizar una librería como `smtplib` para enviar correos de confirmación.
+
+4. **Roles y Permisos**:
+   - **Descripción**: Implementar un sistema de roles (e.g., usuario, administrador) y permisos para diferentes acciones.
+   - **Ejercicio**: Añadir un campo `role` en el modelo `User` y modificar los endpoints para que solo los administradores puedan eliminar tareas.
+
+5. **Documentación Automática**:
+   - **Descripción**: Mejorar la documentación generada automáticamente por FastAPI utilizando `tags` y `descriptions`.
+   - **Ejercicio**: Añadir descripciones detalladas y organizar los endpoints por tags en el archivo `main.py`.
+
+### Nivel Avanzado
+
+6. **Notificaciones en Tiempo Real**:
+   - **Descripción**: Implementar notificaciones en tiempo real cuando se crean o modifican tareas utilizando WebSockets.
+   - **Ejercicio**: Utilizar WebSockets para enviar notificaciones al cliente cuando una tarea es creada o modificada.
+
+7. **Pruebas Unitarias y de Integración**:
+   - **Descripción**: Escribir pruebas unitarias y de integración para asegurar la calidad del código.
+   - **Ejercicio**: Utilizar `pytest` y `httpx` para escribir pruebas que verifiquen el comportamiento de los endpoints.
+
+8. **Despliegue en la Nube**:
+   - **Descripción**: Configurar el despliegue de la aplicación en una plataforma en la nube como AWS, GCP, o Heroku.
+   - **Ejercicio**: Crear un archivo `Dockerfile` y un archivo `docker-compose.yml` para contenerizar la aplicación y desplegarla en un servicio de nube.
+
+9. **Optimización de Consultas a la Base de Datos**:
+   - **Descripción**: Optimizar las consultas a MongoDB para mejorar el rendimiento.
+   - **Ejercicio**: Utilizar índices en MongoDB y revisar las consultas para asegurarse de que son eficientes.
+
+10. **Registro y Monitoreo**:
+    - **Descripción**: Implementar un sistema de registro (logging) y monitoreo para la aplicación.
+    - **Ejercicio**: Utilizar una librería como `loguru` para el registro de eventos y configurar un servicio como `Prometheus` para el monitoreo.
+
+Estas mejoras y ejercicios pueden ayudar a que la aplicación sea más robusta, segura y funcional. Cada uno de estos puntos puede ser desarrollado e integrado de manera independiente y gradual.
