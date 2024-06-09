@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Query
 from db.Models.modelos_tareas import Tarea, TareaId, User, UserDB, Token, TokenData
 from db.client import client
 from db.Schemas.esquemas_tareas import tarea_to_dict, user_to_dict
@@ -33,15 +33,18 @@ async def insertar_tarea(nueva_tarea:Tarea) -> TareaId:
 
 
 @app.get("/consultar_total_de_tareas", response_model=List[TareaId], summary="Endpoint que sirve para consultar todas las tareas creadas")
-async def total_tareas() -> List[TareaId]:
+async def total_tareas(skip: int = Query(0,description="Número de datos a omitir(skip)"), limit:int = Query(5, description="Cantidad de tareas a mostrar por cada página")) -> List[TareaId]:
     """
     Consulta todas las tareas creadas.
+    Parámetros:
+    - `skip`: Número de datos a omitir(skip).
+    - `limit`: Cantidad de tareas a mostrar por cada página.
 
     Retorna:
-    - Lista[TareaId]: Lista de todas las tareas creadas.
+    - Lista[TareaId]: Lista de todas las tareas creadas por páginas de hasta 5 tareas.
     """
     lista_total = []
-    for doc in client.local.tareas.find():
+    for doc in client.local.tareas.find().skip(skip).limit(limit):
         doc_dict = tarea_to_dict(doc)
         lista_total.append(TareaId(**doc_dict)) 
     return lista_total
@@ -141,15 +144,18 @@ async def insertar_user(nuevo_user:User) -> UserDB:
 
 
 @app.get("/consultar_total_users", response_model=List[UserDB], summary="Endpoint que me devuelve el total de usuarios en la base de datos")
-async def consultar_total_users() -> List[UserDB]:
+async def consultar_total_users(skip:int = Query(0, description="Cantidad de usuarios a omitir"), limit:int = Query(3, description="Cantidad de usuarios que se muestra en cada página")) -> List[UserDB]:
     """
     Consulta el total de usuarios en la base de datos.
+    Parámetros:
+    - `skip`: Número de datos a omitir(skip).
+    - `limit`: Cantidad de usuarios a mostrar por cada página.
 
     Retorna:
     - Lista[UserDB]: Lista de todos los usuarios en la base de datos.
     """
     lista_total = []
-    for user in client.local.users.find():
+    for user in client.local.users.find().skip(skip).limit(limit):
         dict_user=user_to_dict(user)
         lista_total.append(UserDB(**dict_user))
     return lista_total

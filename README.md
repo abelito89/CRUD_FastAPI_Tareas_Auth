@@ -1,11 +1,10 @@
 # CRUD_FastAPI_Tareas_Auth
 
-
 # README para Aplicación FastAPI
 
 ## Descripción del Proyecto
 
-Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplicación permite a los usuarios crear, consultar, modificar y eliminar tareas. Además, incluye autenticación de usuarios mediante OAuth2 y gestión de usuarios en una base de datos MongoDB.
+Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplicación permite a los usuarios crear, consultar, modificar y eliminar tareas. Además, incluye autenticación de usuarios mediante OAuth2 y gestión de usuarios en una base de datos MongoDB. Incluye validación de validez de email y de contraseñas que sean de al menos 8 caracteres, con caracteres especiales, númereos, letras mayúsculas y letras minúsculas.
 
 ## Características
 
@@ -14,7 +13,7 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
 - **Buscar tarea por ID**: Permite encontrar una tarea específica dado su ID.
 - **Modificar tareas**: Permite modificar una tarea existente.
 - **Eliminar tareas**: Permite eliminar tareas por título.
-- **Gestión de usuarios**: Creación y autenticación de usuarios.
+- **Gestión de usuarios**: Creación y autenticación de usuarios. Validación de emails válidos y contraseñas que cumplan con los requerimientos.
 - **Autenticación JWT**: Seguridad mediante tokens JWT para las operaciones de usuario.
 
 ## Requisitos
@@ -164,17 +163,7 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
 
 - `main.py`: Archivo principal con las rutas y lógica de la aplicación.
 - `Autenticacion.py`: Contiene la lógica de autenticación y creación de tokens.
-- `client.py`: Configuración del cliente de MongoDB.
-- `Schemas/esquemas_tareas.py`: Esquemas para convertir datos de MongoDB a diccionarios Python.
-- `Models/modelos_tareas.py`: Modelos de datos para Pydantic.
+- `db/client.py`: Configuración del cliente de MongoDB.
+- `db/Schemas/esquemas_tareas.py`: Esquemas para convertir datos de MongoDB a diccionarios Python.
+- `db/Models/modelos_tareas.py`: Modelos de datos para Pydantic.
 - `requirements.txt`: Lista de dependencias del proyecto.
-
-## Contribución
-
-Las contribuciones son bienvenidas. Para contribuir, por favor sigue los siguientes pasos:
-
-1. Realiza un fork del repositorio.
-2. Crea una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
-3. Realiza los cambios necesarios y comitea (`git commit -m 'Agregar nueva funcionalidad'`).
-4. Sube tus cambios (`git push origin feature/nueva-funcionalidad`).
-5. Abre un Pull Request.
