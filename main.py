@@ -136,14 +136,13 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     usuario_existente = client.local.users.find_one({"email": nuevo_user.email})
     if usuario_existente:
         raise HTTPException(status_code=409, detail="El correo electrónico ya está en uso")
+    
     hashed_password = bcrypt.hashpw(nuevo_user.password.encode('utf-8'), bcrypt.gensalt())
     nuevo_user_dict = dict(nuevo_user)
     nuevo_user_dict['password'] = hashed_password.decode('utf-8')
     id = client.local.users.insert_one(nuevo_user_dict).inserted_id
     user_mongo = user_to_dict(client.local.users.find_one({"_id":id}))
-    
-
-    send_email(user_mongo['email'])
+    send_email(user_mongo['email'], user_mongo['username'])
     return UserDB(**user_mongo)
 
 
