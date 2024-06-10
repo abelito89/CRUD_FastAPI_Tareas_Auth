@@ -11,6 +11,7 @@ from Autenticacion import get_user, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import bcrypt
+from email_sender import send_email
 
 app = FastAPI()
 
@@ -140,6 +141,9 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     nuevo_user_dict['password'] = hashed_password.decode('utf-8')
     id = client.local.users.insert_one(nuevo_user_dict).inserted_id
     user_mongo = user_to_dict(client.local.users.find_one({"_id":id}))
+    
+
+    send_email(user_mongo['email'])
     return UserDB(**user_mongo)
 
 
