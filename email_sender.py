@@ -16,7 +16,7 @@ EMAIL_FROM = os.getenv('EMAIL_FROM') #desde donde se envía el correo
 
 context = ssl.create_default_context()
 
-def send_email(to_email, username):
+def send_email(to_email, subject, body):
     """
     Envía un correo de confirmación al usuario recién creado.
 
@@ -29,8 +29,8 @@ def send_email(to_email, username):
     msg = EmailMessage()
     msg['From'] = EMAIL_FROM
     msg['To'] = to_email
-    msg['Subject'] = 'Correo de confirmación de creación de usuario nuevo'
-    msg.set_content(f'Se ha creado el usuario {username} satisfactoriamente')
+    msg['Subject'] = subject
+    msg.set_content(body)
     # Establecer conexión con el servidor SMTP y enviar correo
     with smtplib.SMTP_SSL(EMAIL_HOST, EMAIL_PORT, context=context) as server:
         server.login(EMAIL_FROM, EMAIL_PASSWORD)
