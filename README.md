@@ -4,7 +4,7 @@
 
 ## Descripción del Proyecto
 
-Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplicación permite a los usuarios crear, consultar, modificar y eliminar tareas. Además, incluye autenticación de usuarios mediante OAuth2 y gestión de usuarios en una base de datos MongoDB. Incluye validación de validez de email y de contraseñas que sean de al menos 8 caracteres, con caracteres especiales, númereos, letras mayúsculas y letras minúsculas.
+Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplicación permite a los usuarios crear, consultar, modificar y eliminar tareas. Además, incluye autenticación de usuarios mediante OAuth2 y gestión de usuarios en una base de datos MongoDB. Incluye validación de email y de contraseñas que sean de al menos 8 caracteres, con caracteres especiales, números, letras mayúsculas y letras minúsculas. Se puede crear y eliminar usuarios, los cuales deben tener usernames y emails únicos.
 
 ## Características
 
@@ -147,6 +147,12 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
   GET /search_user/{username}
   ```
 
+- **Eliminar un usuario según su nombre de usuario**
+
+  ```http
+  DELETE /eliminar_usuario/{username}
+  ```
+
 - **Obtener token de acceso**
 
   ```http
@@ -167,6 +173,7 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
 
 - `main.py`: Archivo principal con las rutas y lógica de la aplicación.
 - `Autenticacion.py`: Contiene la lógica de autenticación y creación de tokens.
+- `email_sender.py`: Contiene la lógica de configuración del servidor de correos y envío de los mismos (Gmail).
 - `db/client.py`: Configuración del cliente de MongoDB.
 - `db/Schemas/esquemas_tareas.py`: Esquemas para convertir datos de MongoDB a diccionarios Python.
 - `db/Models/modelos_tareas.py`: Modelos de datos para Pydantic.

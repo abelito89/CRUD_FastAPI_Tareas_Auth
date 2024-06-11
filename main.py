@@ -103,7 +103,7 @@ async def modificar_tarea(id_modificar:str, titulo_nuevo:str, estado_inicial_nue
         raise HTTPException(status_code=404, detail="Tarea no encontrada")
 
 
-@app.delete("/eliminar_tarea/{titulo_eliminar}", response_model=dict, summary="Endpoint para eliminar tarea segun el título")
+@app.delete("/eliminar_tarea/{titulo_eliminar}", response_model=dict, status_code=200, summary="Endpoint para eliminar tarea segun el título")
 async def eliminar_tarea(titulo_eliminar:str) -> dict:
     """
     Elimina una tarea según el título.
@@ -191,7 +191,24 @@ async def search_user(username:str) -> UserDB:
     )
  #la funcion de buscar usuarios hay que traerla de un modulo extra
 
-#@app.delete("/eliminar_usuario/{username}", response_model="")
+@app.delete("/eliminar_usuario/{username}", response_model= dict, status_code=200, summary="Endpoint para eliminar un usuario según su nombre")
+async def eliminar_usuario(username:str) -> dict:
+    """
+    Elimina un usuario de la base de datos según su nombre de usuario.
+
+    Parámetros:
+    - `username`: El nombre de usuario del usuario a ser eliminado.
+
+    Retorna:
+    - Un diccionario con la cantidad de usuarios eliminados si la eliminación es exitosa.
+    - Lanza una excepción HTTP 404 si el usuario no se encuentra.
+    """
+    conteo_de_eliminados=client.local.users.delete_one({"username":username}).deleted_count
+    if conteo_de_eliminados != 0:    
+        return {"Cantidad de usuarios eliminados":conteo_de_eliminados}
+    else:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
 
 @app.post("/token", response_model=Token)
 async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) -> Token:
