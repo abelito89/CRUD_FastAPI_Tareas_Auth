@@ -133,10 +133,12 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     Retorna:
     - `UserDB`: El usuario creado.
     """
-    usuario_existente = client.local.users.find_one({"email": nuevo_user.email})
-    if usuario_existente:
+    email_existente = client.local.users.find_one({"email": nuevo_user.email})
+    username_existente = client.local.users.find_one({"username": nuevo_user.username})
+    if email_existente:
         raise HTTPException(status_code=409, detail="El correo electrónico ya está en uso")
-    
+    elif username_existente:
+        raise HTTPException(status_code=409, detail="El nombre de usuario ya está en uso, por favor elija otro")    
     hashed_password = bcrypt.hashpw(nuevo_user.password.encode('utf-8'), bcrypt.gensalt())
     nuevo_user_dict = dict(nuevo_user)
     nuevo_user_dict['password'] = hashed_password.decode('utf-8')
@@ -188,6 +190,8 @@ async def search_user(username:str) -> UserDB:
         detail="Usuario no encontrado",
     )
  #la funcion de buscar usuarios hay que traerla de un modulo extra
+
+#@app.delete("/eliminar_usuario/{username}", response_model="")
 
 @app.post("/token", response_model=Token)
 async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) -> Token:

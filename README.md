@@ -15,7 +15,7 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
 - **Eliminar tareas**: Permite eliminar tareas por título.
 - **Gestión de usuarios**: Creación y autenticación de usuarios. Validación de emails válidos y contraseñas que cumplan con los requerimientos.
 - **Autenticación JWT**: Seguridad mediante tokens JWT para las operaciones de usuario.
-- **Envío de un correo electrónico**: Envío de correos cada vez que se crean usuarios nuevos con el mismo orignen y destino para comprobar el funcionamiento del servidor de correos.
+- **Envío de un correo electrónico**: Envío de correos cada vez que se crean usuarios nuevos con el mismo origen y destino para comprobar el funcionamiento del servidor de correos.
 
 ## Requisitos
 
@@ -51,6 +51,9 @@ Esta es una aplicación de gestión de tareas desarrollada con FastAPI. La aplic
    SECRET_KEY=tu_secreto
    ALGORITHM=HS256
    ACCESS_TOKEN_EXPIRE_MINUTES=30
+   EMAIL_PASSWORD = password_email
+   EMAIL_FROM = email_origen
+   EMAIL_USER = email_destino
    ```
 
 5. Inicia el servidor de desarrollo:
