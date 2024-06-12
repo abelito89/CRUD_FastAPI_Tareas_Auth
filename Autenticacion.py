@@ -6,8 +6,9 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 import bcrypt
 from db.client import client
-from db.Models.modelos_tareas import User, UserDB
+from db.Models.modelos_tareas import User, UserDB, TokenData
 from db.Schemas.esquemas_tareas import user_to_dict
+from fastapi import HTTPException, Security, status, Depends
 
 #Configuracion de OAuth2
 load_dotenv() #Cargar variables de entorno desde .env
@@ -86,3 +87,81 @@ def get_user(username:str) -> UserDB:
     return None
 
 
+def get_current_user(token: str = Depends(oauth2_scheme)) -> UserDB:
+    """
+    Obtiene el usuario actual autenticado.
+
+    Parámetros:
+    - `token`: El token de acceso del usuario.
+
+    Retorna:
+    - `UserDB`: Los datos del usuario autenticado.
+
+    Lanza:
+    - `HTTPException`: Si el token no es válido o el usuario no se encuentra.
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])  # Decodificar el token JWT
+        username: str = payload.get("sub")  # Obtener el nombre de usuario del token
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception  # Lanzar excepción si hay un error con el token
+    user = get_user(username=token_data.username)  # Obtener el usuario de la base de datos
+    if user is None:
+        raise credentials_exception  # Lanzar excepción si el usuario no se encuentra
+    return user  # Retornar el usuario autenticado
+
+
+# Función para verificar el rol del usuario
+def verify_role(role: str):
+    """
+    Verifica si el usuario actual tiene el rol especificado.
+
+    Parámetros:
+    - `role`: El rol requerido para acceder al endpoint.
+
+    Retorna:
+    - `Callable`: Una función que verifica el rol del usuario actual.
+
+    Lanza:
+    - `HTTPException`: Si el usuario no tiene el rol requerido.
+    """
+    def role_verification(current_user: UserDB = Security(get_current_user)):
+        """
+        Verifica el rol del usuario actual.
+
+        Parámetros:
+        - `current_user`: El usuario actual obtenido a través de la seguridad de FastAPI.
+
+        Retorna:
+        - `UserDB`: El usuario actual si tiene el rol requerido.
+
+        Lanza:
+        - `HTTPException`: Si el usuario no tiene el rol requerido.
+        """
+        if current_user.role != role:
+            # Si el rol del usuario no coincide con el rol requerido, se lanza una excepción HTTP 403
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tiene permiso para realizar esta acción"
+            )
+        return current_user  # Retornar el usuario actual si tiene el rol requerido
+    return role_verification  # Retornar la función de verificación de rol
+
+
+first_user_created = False
+
+# Función para verificar si hay usuarios en la base de datos
+def check_first_user():
+    global first_user_created
+    if not first_user_created:
+        user_count = client.local.users.count_documents({})
+        if user_count == 0:
+            first_user_created = True

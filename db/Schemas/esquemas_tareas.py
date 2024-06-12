@@ -29,4 +29,5 @@ def user_to_dict(user) -> dict:
             "full_name":user["full_name"], 
             "email":user["email"], 
             "disabled":user["disabled"],
-            "password":user["password"]}
+            "password":user["password"],
+            "role":user["role"]}

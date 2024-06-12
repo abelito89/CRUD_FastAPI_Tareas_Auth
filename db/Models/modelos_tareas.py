@@ -21,6 +21,8 @@ class User(BaseModel):
     email:EmailStr = Field(..., description="Correo electrónico del usuario")
     disabled:bool = Field(..., description="Estado de habilitación del usuario")
     password: str = Field(..., min_length=8, description="Password del usuario")
+    role: Optional[str] = Field("user", description="Rol del usuario, por defecto 'user'")
+    
     @validator('password')
     def validate_password(cls, v):
         if len(v) < 8:
@@ -43,6 +45,8 @@ class UserDB(BaseModel):
     email:EmailStr = Field(..., description="Correo electrónico del usuario")
     disabled:bool = Field(..., description="Estado de habilitación del usuario")
     password:str = Field(..., min_length=8, description="Password del usuario")
+    role: Optional[str] = Field("user", description="Rol del usuario, por defecto 'user'")
+
     @validator('password')
     def validate_password(cls, v):
         if len(v) < 8:

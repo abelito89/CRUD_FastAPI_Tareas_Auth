@@ -7,13 +7,15 @@ from bson.objectid import ObjectId
 from pymongo import ReturnDocument
 from bson.errors import InvalidId
 from fastapi.security import OAuth2PasswordRequestForm
-from Autenticacion import get_user, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, oauth2_scheme, SECRET_KEY, ALGORITHM
+from Autenticacion import get_user, verify_password, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, oauth2_scheme, SECRET_KEY, ALGORITHM, verify_role,check_first_user, first_user_created, get_current_user
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 import bcrypt
 from email_sender import send_email
+from first_user_admin import create_first_user_admin
 
 app = FastAPI()
+admin = create_first_user_admin()
 
 
 @app.post("/insertar_tarea", response_model=TareaId, status_code=201, summary="Endpoint que sirve para crear nuevas tareas")
@@ -123,7 +125,7 @@ async def eliminar_tarea(titulo_eliminar:str) -> dict:
 #Creacion y autenticación de usuarios
 
 @app.post("/insertar_user", response_model=UserDB, status_code=201, summary="Endpoint que sirve para crear nuevos usuarios")
-async def insertar_user(nuevo_user:User) -> UserDB:
+async def insertar_user(nuevo_user:User, current_user:UserDB=Depends(verify_role("admin"))) -> UserDB:
     """
     Crea un nuevo usuario.
 
@@ -133,6 +135,20 @@ async def insertar_user(nuevo_user:User) -> UserDB:
     Retorna:
     - `UserDB`: El usuario creado.
     """
+    check_first_user()
+    if not first_user_created:
+        # Si no hay usuarios en la base de datos, permitir la creación sin autenticación
+        nuevo_user.role = "admin"  # Establecer el primer usuario como administrador
+    else:
+        # Si ya hay usuarios en la base de datos, requerir autenticación
+        current_user = get_current_user()
+        if current_user.role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No tiene permiso para realizar esta acción"
+            )
+
+
     email_existente = client.local.users.find_one({"email": nuevo_user.email})
     username_existente = client.local.users.find_one({"username": nuevo_user.username})
     if email_existente:
@@ -170,7 +186,7 @@ async def consultar_total_users(skip:int = Query(0, description="Cantidad de usu
 
 
 @app.get("/search_user/{username}", response_model=UserDB, status_code=200, summary="Endpoint que sirve para buscar un usuario específico" )
-async def search_user(username:str) -> UserDB:
+async def search_user(username:str,current_user:UserDB=Depends(verify_role("admin"))) -> UserDB:
     """
     Busca un usuario específico.
 
@@ -203,6 +219,8 @@ async def eliminar_usuario(username:str) -> dict:
     - Un diccionario con la cantidad de usuarios eliminados si la eliminación es exitosa.
     - Lanza una excepción HTTP 404 si el usuario no se encuentra.
     """
+    if username == "administrator":
+        raise HTTPException(status_code=400, detail="No se puede eliminar el usuario administrator")
     conteo_de_eliminados=client.local.users.delete_one({"username":username}).deleted_count
     if conteo_de_eliminados != 0:    
         return {"Cantidad de usuarios eliminados":conteo_de_eliminados}
@@ -237,7 +255,7 @@ async def login_access_token(form_data:OAuth2PasswordRequestForm = Depends()) ->
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub":user.username}, expires_delta=access_token_expires
+        data={"sub":user.username,"role": user.role}, expires_delta=access_token_expires
     )
     return {"access_token":access_token, "token_type":"bearer"}
 
@@ -273,3 +291,7 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
