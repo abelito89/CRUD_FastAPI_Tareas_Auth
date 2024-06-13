@@ -208,7 +208,7 @@ async def search_user(username:str,current_user:UserDB=Depends(verify_role("admi
  #la funcion de buscar usuarios hay que traerla de un modulo extra
 
 @app.delete("/eliminar_usuario/{username}", response_model= dict, status_code=200, summary="Endpoint para eliminar un usuario según su nombre")
-async def eliminar_usuario(username:str) -> dict:
+async def eliminar_usuario(username:str, current_user:UserDB=Depends(verify_role("admin"))) -> dict:
     """
     Elimina un usuario de la base de datos según su nombre de usuario.
 
@@ -219,6 +219,9 @@ async def eliminar_usuario(username:str) -> dict:
     - Un diccionario con la cantidad de usuarios eliminados si la eliminación es exitosa.
     - Lanza una excepción HTTP 404 si el usuario no se encuentra.
     """
+    
+    if username == current_user.username:
+        raise HTTPException(status_code=400, detail=f"No se puede eliminar el usuario {username} debido a que está autenticado en este momento")
     if username == "administrator":
         raise HTTPException(status_code=400, detail="No se puede eliminar el usuario administrator")
     conteo_de_eliminados=client.local.users.delete_one({"username":username}).deleted_count
@@ -294,4 +297,4 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

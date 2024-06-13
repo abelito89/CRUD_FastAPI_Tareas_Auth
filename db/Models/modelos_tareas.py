@@ -36,6 +36,12 @@ class User(BaseModel):
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
             raise ValueError('La contraseña debe contener al menos un carácter especial')
         return v
+    
+    @validator('role')
+    def validate_role(cls, v):
+        if v not in ('admin', 'user'):
+            raise ValueError("El rol debe ser 'admin' o 'user'")
+        return v
 
 
 class UserDB(BaseModel):
@@ -59,6 +65,12 @@ class UserDB(BaseModel):
             raise ValueError('La contraseña debe contener al menos un número')
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
             raise ValueError('La contraseña debe contener al menos un carácter especial')
+        return v
+    
+    @validator('role')
+    def validate_role(cls, v):
+        if v not in ('admin', 'user'):
+            raise ValueError("El rol debe ser 'admin' o 'user'")
         return v
 
 
